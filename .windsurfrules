@@ -1,5 +1,7 @@
 # Effective Dart Rules
 
+**Note**: This Flutter project is built exclusively for **iOS** and **Android** platforms. Other platforms like web, desktop, and embedded are not supported.
+
 ### Naming Conventions
 
 1. Use terms consistently throughout your code.
