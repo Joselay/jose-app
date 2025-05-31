@@ -29,8 +29,8 @@ class ScheduleView extends StatefulWidget {
 }
 
 class _ScheduleViewState extends State<ScheduleView>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+    with TickerProviderStateMixin {
+  TabController? _tabController;
 
   @override
   void initState() {
@@ -45,7 +45,11 @@ class _ScheduleViewState extends State<ScheduleView>
 
     if (widget.state.status == ScheduleStatus.success &&
         widget.state.schedulesByDay.isNotEmpty) {
-      _initTabController();
+      if (_tabController == null ||
+          _tabController!.length != widget.state.schedulesByDay.keys.length) {
+        _disposeTabController();
+        _initTabController();
+      }
     }
   }
 
@@ -58,11 +62,14 @@ class _ScheduleViewState extends State<ScheduleView>
     );
   }
 
+  void _disposeTabController() {
+    _tabController?.dispose();
+    _tabController = null;
+  }
+
   @override
   void dispose() {
-    if (widget.state.schedulesByDay.isNotEmpty) {
-      _tabController.dispose();
-    }
+    _disposeTabController();
     super.dispose();
   }
 
@@ -83,7 +90,7 @@ class _ScheduleViewState extends State<ScheduleView>
             widget.state.status == ScheduleStatus.success &&
                 widget.state.schedulesByDay.isNotEmpty
             ? TabBar(
-                controller: _tabController,
+                controller: _tabController!,
                 isScrollable: true,
                 tabs: widget.state.schedulesByDay.keys.map((day) {
                   return Tab(text: _formatDayName(day));
@@ -146,7 +153,7 @@ class _ScheduleViewState extends State<ScheduleView>
         schedulesByDay: final byDay,
       ) =>
         TabBarView(
-          controller: _tabController,
+          controller: _tabController!,
           children: byDay.entries.map((entry) {
             final (day, daySchedules) = (entry.key, entry.value);
 
