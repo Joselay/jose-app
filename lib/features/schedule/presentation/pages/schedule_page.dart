@@ -28,49 +28,13 @@ class ScheduleView extends StatefulWidget {
   State<ScheduleView> createState() => _ScheduleViewState();
 }
 
-class _ScheduleViewState extends State<ScheduleView>
-    with TickerProviderStateMixin {
-  TabController? _tabController;
+class _ScheduleViewState extends State<ScheduleView> {
+  String _selectedDay = '';
 
   @override
   void initState() {
     super.initState();
-
     context.read<ScheduleBloc>().add(const ScheduleStarted());
-  }
-
-  @override
-  void didUpdateWidget(ScheduleView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.state.status == ScheduleStatus.success &&
-        widget.state.schedulesByDay.isNotEmpty) {
-      if (_tabController == null ||
-          _tabController!.length != widget.state.schedulesByDay.keys.length) {
-        _disposeTabController();
-        _initTabController();
-      }
-    }
-  }
-
-  void _initTabController() {
-    if (widget.state.schedulesByDay.isEmpty) return;
-
-    _tabController = TabController(
-      length: widget.state.schedulesByDay.keys.length,
-      vsync: this,
-    );
-  }
-
-  void _disposeTabController() {
-    _tabController?.dispose();
-    _tabController = null;
-  }
-
-  @override
-  void dispose() {
-    _disposeTabController();
-    super.dispose();
   }
 
   @override
@@ -86,19 +50,13 @@ class _ScheduleViewState extends State<ScheduleView>
             },
           ),
         ],
-        bottom:
-            widget.state.status == ScheduleStatus.success &&
-                widget.state.schedulesByDay.isNotEmpty
-            ? TabBar(
-                controller: _tabController!,
-                isScrollable: true,
-                tabs: widget.state.schedulesByDay.keys.map((day) {
-                  return Tab(text: _formatDayName(day));
-                }).toList(),
-              )
-            : null,
       ),
-      body: SafeArea(child: _buildBody()),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: _buildBody(),
+        ),
+      ),
     );
   }
 
@@ -152,33 +110,80 @@ class _ScheduleViewState extends State<ScheduleView>
         status: ScheduleStatus.success,
         schedulesByDay: final byDay,
       ) =>
-        TabBarView(
-          controller: _tabController!,
-          children: byDay.entries.map((entry) {
-            final (day, daySchedules) = (entry.key, entry.value);
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 40,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: byDay.keys.map((day) {
+                    final formattedDay = _formatDayName(day);
+                    final isSelected = _selectedDay.isEmpty
+                        ? day == byDay.keys.first
+                        : day == _selectedDay;
 
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _formatDayName(day),
-                      style: ShadTheme.of(context).textTheme.h3,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${daySchedules.length} classes scheduled',
-                      style: ShadTheme.of(context).textTheme.muted,
-                    ),
-                    const SizedBox(height: 24),
-                    ScheduleCarousel(schedules: daySchedules),
-                  ],
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: isSelected
+                          ? ShadButton(
+                              size: ShadButtonSize.sm,
+                              onPressed: () {
+                                setState(() {
+                                  _selectedDay = day;
+                                });
+                              },
+                              child: Text(formattedDay),
+                            )
+                          : ShadButton.outline(
+                              size: ShadButtonSize.sm,
+                              onPressed: () {
+                                setState(() {
+                                  _selectedDay = day;
+                                });
+                              },
+                              child: Text(formattedDay),
+                            ),
+                    );
+                  }).toList(),
                 ),
               ),
-            );
-          }).toList(),
+            ),
+
+            const SizedBox(height: 16),
+
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  final selectedDayKey = _selectedDay.isEmpty
+                      ? byDay.keys.first
+                      : _selectedDay;
+                  final daySchedules = byDay[selectedDayKey] ?? [];
+                  final formattedDay = _formatDayName(selectedDayKey);
+
+                  return SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          formattedDay,
+                          style: ShadTheme.of(context).textTheme.h3,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${daySchedules.length} classes scheduled',
+                          style: ShadTheme.of(context).textTheme.muted,
+                        ),
+                        const SizedBox(height: 24),
+                        ScheduleCarousel(schedules: daySchedules),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
     };
   }
