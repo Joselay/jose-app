@@ -1,40 +1,52 @@
-# Profile Carousel App
+# Class Schedule App
 
-A Flutter application featuring a horizontal scroll snap profile carousel with indicators.
+A Flutter application featuring a class schedule management system with a horizontal scroll snap carousel and day-based filtering.
 
 ## Features
 
-- Horizontal scroll snap carousel with smooth transitions
-- Three indicator dots that highlight the current profile
-- Profile cards with avatar, name, role, bio, and action button
-- Color-coded avatars with initials when no image is available
+- Day-based filtering with easy tab navigation
+- Horizontal scroll snap carousel with smooth transitions and animations
+- Indicator dots that highlight the current schedule card
+- Schedule cards with teacher name, subject, room, and time information
+- Clean UI using ShadCN UI components
+- BLoC pattern for state management
 - Responsive design that works across different screen sizes
 
 ## Project Structure
 
-This project follows a feature-first architecture:
+This project follows a clean architecture with feature-first organization:
 
 ```
 lib/
+  ├── core/
+  │   └── di/
+  │       └── injection.dart
   ├── features/
-  │   └── profile/
+  │   └── schedule/
   │       ├── domain/
   │       │   └── entities/
-  │       │       └── profile_entity.dart
+  │       │       └── schedule_entity.dart
   │       └── presentation/
+  │           ├── bloc/
+  │           │   ├── schedule_bloc.dart
+  │           │   ├── schedule_event.dart
+  │           │   └── schedule_state.dart
   │           ├── pages/
-  │           │   └── profile_carousel_page.dart
+  │           │   └── schedule_page.dart
   │           └── widgets/
-  │               └── profile_carousel.dart
+  │               ├── schedule_card.dart
+  │               └── schedule_carousel.dart
   └── main.dart
 ```
 
 ## Implementation Details
 
-- Uses Flutter's native Material components for UI elements
-- Implements custom carousel using PageView with controller
-- Features animated indicators that show the current page
-- Uses a feature-first architecture for better maintainability
+- Uses Flutter's BLoC pattern for state management
+- Implements dependency injection for better testability
+- Features a custom carousel using PageView with controller
+- Animated indicators show the current page
+- Uses a clean architecture approach for better maintainability
+- Integrates ShadCN UI for modern, consistent styling
 
 ## Getting Started
 
@@ -45,5 +57,13 @@ lib/
 ## Dependencies
 
 - Flutter SDK ^3.8.1
+- flutter_bloc: for state management
+- equatable: for value equality
+- get_it: for dependency injection
+- shadcn_ui: for UI components
 
+## Development Commands
+
+```
 flutter pub run build_runner build --delete-conflicting-outputs
+```
